@@ -3,6 +3,9 @@ use std::{fs::read_to_string, str::FromStr};
 fn main() {
     let response_v1 = v1("input.txt");
     println!("Response v1={response_v1}");
+
+    let response_v2 = v2("input.txt");
+    println!("Response v2={response_v2}");
 }
 
 #[derive(Debug)]
@@ -36,6 +39,36 @@ fn is_id_valid(id: &str) -> bool {
     first_half != second_half
 }
 
+fn is_id_valid_v2(id: &str) -> bool {
+    if id.len() < 2 {
+        return true;
+    }
+
+    for substring_len in 1..(id.len() / 2 + 1) {
+        let mut old_substring = &id[0..substring_len];
+
+        let mut substring_index = substring_len;
+        while substring_index <= id.len() - substring_len {
+            let max_index = std::cmp::min(substring_index + substring_len, id.len());
+            let substring = &id[substring_index..max_index];
+
+            if old_substring != substring {
+                break;
+            }
+
+            old_substring = substring;
+
+            if substring_index == id.len() - substring_len {
+                return false;
+            }
+
+            substring_index += substring_len;
+        }
+    }
+
+    true
+}
+
 fn find_all_invalids(range: &Range) -> Vec<u64> {
     let start: u64 = range.first.parse().unwrap();
     let end: u64 = range.last.parse().unwrap();
@@ -51,6 +84,21 @@ fn find_all_invalids(range: &Range) -> Vec<u64> {
     invalids
 }
 
+fn find_all_invalids_v2(range: &Range) -> Vec<u64> {
+    let start: u64 = range.first.parse().unwrap();
+    let end: u64 = range.last.parse().unwrap();
+
+    let mut invalids = vec![];
+
+    for i in start..end + 1 {
+        if !is_id_valid_v2(i.to_string().as_str()) {
+            invalids.push(i);
+        }
+    }
+
+    invalids
+}
+
 fn v1(file_name: &str) -> u64 {
     let line = read_to_string(file_name).unwrap();
     let ranges = parse_ranges(line);
@@ -58,6 +106,20 @@ fn v1(file_name: &str) -> u64 {
     let mut counter = 0;
     for range in ranges {
         let invalids = find_all_invalids(&range);
+        let sum: u64 = invalids.iter().sum();
+        counter += sum;
+    }
+
+    counter
+}
+
+fn v2(file_name: &str) -> u64 {
+    let line = read_to_string(file_name).unwrap();
+    let ranges = parse_ranges(line);
+
+    let mut counter = 0;
+    for range in ranges {
+        let invalids = find_all_invalids_v2(&range);
         let sum: u64 = invalids.iter().sum();
         counter += sum;
     }
@@ -102,5 +164,15 @@ mod tests {
         assert_eq!(invalids.len(), 2);
         assert_eq!(invalids.first().unwrap(), &11);
         assert_eq!(invalids.last().unwrap(), &22);
+    }
+
+    #[test]
+    fn test_is_id_valid_v2() {
+        assert_eq!(is_id_valid_v2("7"), true);
+        assert_eq!(is_id_valid_v2("77"), false);
+        assert_eq!(is_id_valid_v2("777"), false);
+        assert_eq!(is_id_valid_v2("1212121212"), false);
+        assert_eq!(is_id_valid_v2("824824824"), false);
+        assert_eq!(is_id_valid_v2("824824825"), true);
     }
 }
