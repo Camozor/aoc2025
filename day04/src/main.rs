@@ -2,9 +2,10 @@ use std::fs::read_to_string;
 
 fn main() {
     let lines = read_lines("input.txt");
-    let grid = Grid::from_lines(lines);
+    let mut grid = Grid::from_lines(lines);
 
     println!("Response v1={}", grid.v1());
+    println!("Response v2={}", grid.v2());
 }
 
 fn read_lines(file: &str) -> Vec<String> {
@@ -38,6 +39,31 @@ impl Grid {
                     let neighbours = self.count_neighbours(x as i32, y as i32);
                     if neighbours < 4 {
                         counter += 1;
+                    }
+                }
+            }
+        }
+
+        counter
+    }
+
+    fn v2(&mut self) -> i32 {
+        let mut counter = 0;
+
+        let mut has_at_least_one_change = true;
+
+        while has_at_least_one_change {
+            has_at_least_one_change = false;
+
+            for x in 0..self.grid.len() {
+                for y in 0..self.grid[0].len() {
+                    if self.is_roll(x, y) {
+                        let neighbours = self.count_neighbours(x as i32, y as i32);
+                        if neighbours < 4 {
+                            counter += 1;
+                            self.mark_as_removed(x, y);
+                            has_at_least_one_change = true;
+                        }
                     }
                 }
             }
@@ -82,6 +108,10 @@ impl Grid {
 
     fn is_roll(&self, x: usize, y: usize) -> bool {
         self.grid[x][y] == '@'
+    }
+
+    fn mark_as_removed(&mut self, x: usize, y: usize) {
+        self.grid[x][y] = 'x';
     }
 }
 
