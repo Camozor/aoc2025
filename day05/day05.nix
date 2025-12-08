@@ -26,14 +26,10 @@
     freshList;
 
   isIngredientFreshInRange = idStr: freshRange:
-    let expandedRange = expandRange freshRange;
-    in builtins.any (x: x == lib.toInt idStr) expandedRange;
-
-  expandRange = range:
     let
-      splitted = lib.splitString "-" range;
+      splitted = lib.splitString "-" freshRange;
       first = lib.toInt (builtins.elemAt splitted 0);
       last = lib.toInt (builtins.elemAt splitted 1);
-      explanded = builtins.genList (x: x + first) (last - first + 1);
-    in explanded;
+      id = lib.toInt idStr;
+    in id >= first && id <= last;
 }

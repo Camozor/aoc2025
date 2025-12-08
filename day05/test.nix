@@ -16,9 +16,9 @@ in pkgs.lib.runTests {
     expected = true;
   };
 
-  test_expandRange = {
-    expr = day05.expandRange "2-6";
-    expected = [ 2 3 4 5 6 ];
+  test_isIngredientFreshInRange = {
+    expr = day05.isIngredientFreshInRange "1" "1-3";
+    expected = true;
   };
 
 }
